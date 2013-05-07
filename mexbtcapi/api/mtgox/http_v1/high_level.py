@@ -121,14 +121,15 @@ class MtGoxParticipant(ActiveParticipant):
     def placeOrder(self, order):
         """places an Order in the market for price/amount"""
         now = datetime.utcnow()
-        if order.is_buy_order():
+        order = MarketOrder(self.market, now, self, order.from_amount, order.exchange_rate, order.otype)
+        if order.is_buy_order:
             logger.debug("placing buy order")
-            oid = self.private.bid(order.from_amount.value, order.exchange_rate)
-            return MtGoxOrder(oid, self.market, now, Order.BID, amount, price, entity=self)
+            oid = self.private.bid(order.exchange_rate.convert(order.from_amount,order.exchange_rate.currency1).value, order.exchange_rate.exchange_rate, order.exchange_rate.currency2.name)
+            return MtGoxOrder(oid, self.market, now, self, order.from_amount, order.exchange_rate, order.otype)
         else:
             logger.debug("placing ask order")
-            oid = self.private.ask(amount, price)
-            return MtGoxOrder(oid, self.market, now, Order.ASK, amount, price, entity=self)
+            oid = self.private.ask(order.from_amount.value, order.exchange_rate.exchange_rate, order.exchange_rate.currency2.name)
+            return MtGoxOrder(oid, self.market, now, self, order.from_amount, order.exchange_rate, order.otype)
 
     def cancelOrder(self, order):
         """Cancel an existing order"""
@@ -137,7 +138,7 @@ class MtGoxParticipant(ActiveParticipant):
         logger.debug("cancelling order {0}".format(order.oid))
 
         oid = order.oid
-        if order.is_buy_order():
+        if order.is_buy_order:
             result = self.private.cancel_bid(oid)
         else:
             result = self.private.cancel_ask(oid)

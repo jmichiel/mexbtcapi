@@ -36,14 +36,13 @@ class Order(object):
     exchange_rate.
     """
     TYPES=('market', 'limit')
-    def __init__(self, from_amount, exchange_rate=None, otype=None, entity=None):
+    def __init__(self, from_amount, exchange_rate=None, otype=None):
         assert isinstance(from_amount, Amount)
         assert (not exchange_rate) or isinstance(exchange_rate, ExchangeRate)
         assert (not otype) or (otype in self.TYPES)
 
         self.from_amount = from_amount
         self.exchange_rate = exchange_rate
-        self.entity = entity
         self.otype= otype if otype else 'market' if not exchange_rate else 'limit'
     
     @property
@@ -57,8 +56,8 @@ class Order(object):
         return "{0} >> {1}".format(self.from_amount, self.to_amount)
 
     def __repr__(self):
-        return "<{0}({1}, {2}, {3}, {4}>".format(self.__class__.__name__,
-            self.market, self.timestamp, self.from_amount, self.exchange_rate)
+        return "<{0}({1}, {2})>".format(self.__class__.__name__,
+             self.from_amount, self.exchange_rate)
 
 class MarketOrder( Order ):
     '''A concrete order on a certain market'''
@@ -69,6 +68,7 @@ class MarketOrder( Order ):
         super(MarketOrder,self).__init__(*args, **kwargs)
         self.market = market
         self.timestamp = timestamp
+        self.entity = entity
     
     @property
     def is_buy_order(self):
@@ -78,6 +78,9 @@ class MarketOrder( Order ):
     def is_sell_order(self):
         return self.from_amount.currency == self.market.buy_currency
         
+    def __repr__(self):
+        return "<{0}({1}, {2}, {3}, {4})>".format(self.__class__.__name__,
+            self.market, self.timestamp, self.from_amount, self.exchange_rate)
 
 class Market(object):
     """Represents a market - where Trades are made"""

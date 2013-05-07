@@ -115,7 +115,6 @@ def _specific(name, currency, data=None, url_params=None):
     url = _URL + 'BTC' + currency + '/' + name
     if url_params is not None:
         url += '?' + urllib.urlencode(url_params)
-    print url
     return _json_request(url, data)
 
 
@@ -206,6 +205,7 @@ class Private:
 
     def _json_request(self, url, data=None):
         req = self._request(url, data)
+        print url
         f = urllib2.urlopen(req)
         jdata = json.load(f)  # , object_pairs_hook=_pairs_hook)
         if jdata['result'] == 'success':
@@ -276,8 +276,8 @@ class Private:
             amount = int(amount * multiplier['BTC'])
         if type(price) in (Decimal, float):
             price = int(price * multiplier[currency])
-        assert type(amount) == int
-        assert type(price) == int
+        assert type(amount) in (int, long), 'amount must be int or long, not %s' % type(amount)
+        assert type(price) in (int, long), 'price must be int or long, not %s' % type(price)
         data = {'type': order_type,
                 'amount_int': amount,
                 'price_int': price}
